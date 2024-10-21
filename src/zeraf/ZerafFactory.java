@@ -38,7 +38,20 @@ public class ZerafFactory {
 		//TODO Ha de solicitar el sistema al que conectar.
 		//TODO Solicitar códigos de usuario y grupo.
 
-		return new Zeraf(system, uid, group, CONFIG_PATH); //TODO Completar.
+		Zeraf zer = null;
+
+		switch (system) {
+			case ATLAS:
+			zer =new ZerafAtlas(uid, group, CONFIG_PATH);
+			break;
+		
+			case MUSEO:
+			zer = new ZerafMuseo(uid, group, CONFIG_PATH);
+
+			break;
+		}
+
+		return zer;
 	}
 	
 	/**

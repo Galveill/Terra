@@ -11,10 +11,8 @@ import java.net.URL;
  * Comunicación con los servidores de los sistemas.
  * @author Adrián.
  */
-public class Zeraf {
-
-	/** El sistema al que conectar. */
-	private final ESistema system;
+public abstract class Zeraf {
+	
 	/** El código de usuario. */
 	private final String uid;
 	/** El código de grupo. */
@@ -24,14 +22,12 @@ public class Zeraf {
 
 	/**
 	 * Constructor parametrizado.
-	 * @param system El sistema con el que conectar.
 	 * @param uid El id del usuario.
 	 * @param group El id del grupo.
 	 * @param url La dirección del servidor.
 	 */
-	Zeraf(ESistema system, String uid, String group, String url)
+	Zeraf(String uid, String group, String url)
 	{
-		this.system = system;
 		this.uid = uid;
 		this.group = group;
 		this.url = url;
