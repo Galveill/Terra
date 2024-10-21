@@ -14,7 +14,7 @@ import java.net.URL;
 public class Zeraf {
 
 	/** El sistema al que conectar. */
-	private final String system;
+	private final ESistema system;
 	/** El código de usuario. */
 	private final String uid;
 	/** El código de grupo. */
@@ -29,7 +29,7 @@ public class Zeraf {
 	 * @param group El id del grupo.
 	 * @param url La dirección del servidor.
 	 */
-	Zeraf(String system, String uid, String group, String url)
+	Zeraf(ESistema system, String uid, String group, String url)
 	{
 		this.system = system;
 		this.uid = uid;

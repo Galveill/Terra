@@ -26,16 +26,19 @@ public class ZerafFactory {
 
 	/**
 	 * Crea un objeto Zeraf, así como el archivo de configuración necesario para su funcionamiento solicitando los datos requeridos para ello.
+	 * @param system El sistema con el que conectar.
+	 * @param uid El id del usuario.
+	 * @param group El id del grupo.
 	 * 
 	 * @return Una instancia de <code>Zeraf</code>.
 	 */
-	public static Zeraf createZeraf()
+	public static Zeraf createZeraf(ESistema system, String uid, String group)
 	{
 		//TODO Sacada de Hermes.
 		//TODO Ha de solicitar el sistema al que conectar.
 		//TODO Solicitar códigos de usuario y grupo.
 
-		return new Zeraf(CONFIG_PATH, CONFIG_PATH, CONFIG_PATH, CONFIG_PATH); //TODO Completar.
+		return new Zeraf(system, uid, group, CONFIG_PATH); //TODO Completar.
 	}
 	
 	/**
