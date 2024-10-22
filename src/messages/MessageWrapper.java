@@ -1,49 +1,26 @@
 package messages;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 /**
- * Envoltorio para enviar los datos al servidor en formato JSON.
+ * Envoltorio para enviar datos al servidor en formato JSON.
  * @author Adrián
  */
-public class MessageWrapper {
-    /** El código del usuario. */
-    private final String uid;
-    /** Los códigos de los tesoros. */
-    private final String[] codes;
+public abstract class MessageWrapper implements IMessageWrapper {
+	/** El código del usuario. */
+	protected final String uid;
+	/** El código del grupo. */
+	protected final String group;
 
-    /**
-     * Constructor parametrizado.
-     * @param uid El código del usuario.
-     * @param codes Los códigos de los tesoros.
-     */
-    public MessageWrapper(String uid, String[] codes)
-    {
-        this.uid = uid;
-        this.codes = codes;
-    }
+	/**
+	 * Constructor parametrizado.
+	 * @param uid El código del usuario.
+	 * @param group El código del grupo.
+	 */
+	public MessageWrapper(String uid, String group)
+	{
+		this.uid = uid;
+		this.group = group;
+	}
 
-    /**
-     * @return El código del usuario.
-     */
-    public String getUid() {
-        return uid;
-    }
-
-    /**
-     * @return Los códigos de los tesoros.
-     */
-    public String[] getCodes() {
-        return codes;
-    }
-
-    /**
-     * @return La representación en JSON del mensaje.
-     */
-    public String getJSON()
-    {
-        Gson gson = new GsonBuilder().create();
-        return gson.toJson(this);
-    }
+	@Override
+	public abstract String getJSON();
 }

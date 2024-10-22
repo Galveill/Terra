@@ -1,11 +1,16 @@
 package zeraf;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+
+import messages.SimpleMessageWrapper;
+import messages.EMsgCodes;
 
 /**
  * Comunicación con los servidores de los sistemas.
@@ -14,7 +19,7 @@ import java.net.URL;
 public abstract class Zeraf {
 	
 	/** El código de usuario. */
-	private final String uid;
+	private String uid;
 	/** El código de grupo. */
 	private final String group;
 	/** La dirección de servidor */
@@ -31,6 +36,15 @@ public abstract class Zeraf {
 		this.uid = uid;
 		this.group = group;
 		this.url = url;
+	}
+
+	/**
+	 * Cambia el usuario.
+	 * @param uid El código del usuario.
+	 */
+	public void setUser(String uid)
+	{
+		this.uid = uid;
 	}
 
 	/**
@@ -63,9 +77,90 @@ public abstract class Zeraf {
 		
 		return false; 
 	}
-	
-	//TODO Si la conexión falla enviando datos, sistema de backup mediante fichero.
-	//TODO El fichero es json con un campo en base64 o similar para verificar la integridad de los datos.
+
+	/**
+	 * Envía datos simples al servidor.
+	 * @param data Los datos a enviar.
+	 * @return El código de respuesta del servidor.
+	 */
+	public EMsgCodes sendSimpleData(String[] data)
+	{
+		String json = new SimpleMessageWrapper(this.uid, this.group, data).getJSON();
+		return this.sendData(json);
+	}
+
+	/**
+	 * Envía datos complejos, objetos, al servidor.
+	 * @return El código de respuesta del servidor.
+	 */
+	public EMsgCodes sendComplexData()
+	{
+		return null; //TODO completar
+	}
+
+	/**
+	 * Envía los datos al servidor.
+	 * @param data Los datos a enviar en formato JSON.
+	 * @return El código de respuesta del servidor.
+	 */
+	protected EMsgCodes sendData(String data)
+	{
+		//TODO Si la conexión falla enviando datos, sistema de backup mediante fichero.
+		//TODO El fichero es json con un campo en base64 o similar para verificar la integridad de los datos.
+		EMsgCodes msgret = EMsgCodes.ERROR_CONNECTION;
+
+		HttpURLConnection con = null;
+		DataOutputStream dos = null;
+		BufferedReader in = null;
+		try {
+			URL obj = new URI(this.url + "/receiver.php").toURL();
+			con = (HttpURLConnection) obj.openConnection();
+
+			// Configurar la conexión
+			con.setRequestMethod("POST");
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setDoOutput(true);
+
+			// Enviar los datos
+			dos = new DataOutputStream(con.getOutputStream());
+			dos.writeBytes(data);
+			dos.flush();
+
+			// Leer la respuesta
+			int responseCode = con.getResponseCode();
+			if(responseCode == 200)
+			{
+				in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+				String inputLine;
+
+				int rescode = Integer.parseInt(in.readLine().toString());
+				msgret = EMsgCodes.values()[rescode];
+				//Más texto
+				while ((inputLine = in.readLine()) != null) {
+					System.err.println(inputLine);
+				}
+			}
+
+		} catch (Exception e) {
+			msgret = EMsgCodes.ERROR_CONNECTION;
+		} finally {
+			if(dos != null) {
+				try {
+					dos.close();
+				} catch (IOException e) {}
+			}
+			if (con != null) {
+				con.disconnect();
+			}
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {}
+			}
+		}
+
+		return msgret;
+	}
 
 	//TODO toString.
 }
