@@ -7,10 +7,10 @@ import com.google.gson.GsonBuilder;
  * Envoltorio para enviar al servidor clases en formato JSON.
  * @author Adrián
  */
-public class ComplexMessageWrapper extends MessageWrapper {
-	//TODO Crearlo
+public class ComplexMessageWrapper<T> extends MessageWrapper {
+	
 	/** La información necesaria. */
-	private final String[] data;
+	private final T data;
 
 	/**
 	 * Constructor parametrizado.
@@ -18,7 +18,7 @@ public class ComplexMessageWrapper extends MessageWrapper {
 	 * @param group El código del grupo.
 	 * @param data Los códigos de los tesoros.
 	 */
-	public ComplexMessageWrapper(String uid, String group, String[] data)
+	public ComplexMessageWrapper(String uid, String group, T data)
 	{
 		super(uid, group);
 		this.data = data;

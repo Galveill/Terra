@@ -3,3 +3,5 @@ logs/
 lib/
 config/
 .vscode/
+
+src/commons/Main.java
