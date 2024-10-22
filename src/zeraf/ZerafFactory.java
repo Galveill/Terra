@@ -26,6 +26,8 @@ public class ZerafFactory {
 
 	/** La ruta del fichero de configuración. */
 	private static final String CONFIG_PATH = "config/Zeraf.conf";
+	/** La ruta de la carpeta de backups. */
+	static final String BACKUP_PATH = "backup/";
 
 	/**
 	 * Crea un objeto Zeraf, así como el archivo de configuración necesario para su funcionamiento solicitando los datos requeridos para ello.
@@ -37,21 +39,9 @@ public class ZerafFactory {
 	 */
 	public static Zeraf createZeraf(ESistema system, String uid, String group)
 	{
-		File f = new File(ZerafFactory.CONFIG_PATH);
-		if(!f.exists())
-		{
-			File dir = new File(f.getParentFile().getPath());
-			if(!dir.exists())
-			{
-				dir.mkdirs();
-			}
-			try {
-				f.createNewFile();
-			} catch (IOException e) {
-				System.err.println("Error al crear el fichero de configuración de la librería Terra");
-				e.printStackTrace();
-			}
-		}
+		ZerafFactory.createFile(ZerafFactory.CONFIG_PATH);
+		ZerafFactory.createFile(ZerafFactory.BACKUP_PATH + "/" + group + "_" + uid + ".bkp");
+
 		String[] conf = ZerafFactory.readConfig();
 		if(conf == null)
 		{
@@ -98,7 +88,7 @@ public class ZerafFactory {
 			new FileOutputStream(ZerafFactory.CONFIG_PATH), "UTF-8")
 		)) {
 			String json = "{" + 
-				"\"URL\": \"" + url + "\"" +
+				"\"URL\": \"" + url + "\", " +
 				"\"Group\": \"" + group + "\"" +
 				"}";
 			bw.write(json);
@@ -130,5 +120,28 @@ public class ZerafFactory {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Crea un fichero si no existe y su ruta completa.
+	 * @param path La ruta completa del fichero a crear.
+	 */
+	private static void createFile(String path)
+	{
+		File f = new File(path);
+		if(!f.exists())
+		{
+			File dir = new File(f.getParentFile().getPath());
+			if(!dir.exists())
+			{
+				dir.mkdirs();
+			}
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				System.err.println("Error al crear el fichero " + path + " de la librería Terra.");
+				e.printStackTrace();
+			}
+		}
 	}
 }
