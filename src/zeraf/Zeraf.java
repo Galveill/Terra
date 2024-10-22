@@ -9,8 +9,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import messages.SimpleMessageWrapper;
 import messages.EMsgCodes;
+import messages.MessageWrapper;
 
 /**
  * Comunicación con los servidores de los sistemas.
@@ -79,32 +79,13 @@ public abstract class Zeraf {
 	}
 
 	/**
-	 * Envía datos simples al servidor.
-	 * @param data Los datos a enviar.
-	 * @return El código de respuesta del servidor.
-	 */
-	public EMsgCodes sendSimpleData(String[] data)
-	{
-		String json = new SimpleMessageWrapper(this.uid, this.group, data).getJSON();
-		return this.sendData(json);
-	}
-
-	/**
-	 * Envía datos complejos, objetos, al servidor.
-	 * @return El código de respuesta del servidor.
-	 */
-	public EMsgCodes sendComplexData()
-	{
-		return null; //TODO completar
-	}
-
-	/**
 	 * Envía los datos al servidor.
 	 * @param data Los datos a enviar en formato JSON.
 	 * @return El código de respuesta del servidor.
 	 */
-	protected EMsgCodes sendData(String data)
+	public <T> EMsgCodes sendData(T data)
 	{
+		String json = new MessageWrapper<T>(this.uid, this.group, data).getJSON();
 		//TODO Si la conexión falla enviando datos, sistema de backup mediante fichero.
 		//TODO El fichero es json con un campo en base64 o similar para verificar la integridad de los datos.
 		EMsgCodes msgret = EMsgCodes.ERROR_CONNECTION;
@@ -123,7 +104,7 @@ public abstract class Zeraf {
 
 			// Enviar los datos
 			dos = new DataOutputStream(con.getOutputStream());
-			dos.writeBytes(data);
+			dos.writeBytes(json);
 			dos.flush();
 
 			// Leer la respuesta
