@@ -4,4 +4,4 @@ lib/
 config/
 .vscode/
 
-src/commons/Main.java
+Main.java
