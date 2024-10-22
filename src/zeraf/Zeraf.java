@@ -21,7 +21,7 @@ import messages.MessageWrapper;
  * Comunicación con los servidores de los sistemas.
  * @author Adrián.
  */
-public abstract class Zeraf {
+public class Zeraf {
 	
 	/** El código de usuario. */
 	protected String uid;
@@ -186,6 +186,7 @@ public abstract class Zeraf {
 	 */
 	public void recoverData()
 	{
+		String json = "";
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(
 			new FileInputStream(ZerafFactory.BACKUP_PATH + "/" + this.group + "_" + this.uid + ".bkp"), "UTF-8")
 		)) {
@@ -196,15 +197,19 @@ public abstract class Zeraf {
 			}
 
 			byte[] deco = Base64.getDecoder().decode(data.toString());
-			String json = new String(deco);
-
-			System.out.println(json); //TODO Quitar.
+			json = new String(deco);
 			
 		} catch (IOException e) {
 			System.err.println("Error al escribir el fichero de backap de los datos.");
 			e.printStackTrace();
 		}
+
+		this.sendData(json);
 	}
 
-	//TODO toString.
+	@Override
+	public String toString()
+	{
+		return "Grupo: " + this.group + ", UID: " + this.uid + ", Servidor: " + this.url;
+	}
 }

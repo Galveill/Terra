@@ -62,19 +62,7 @@ public class ZerafFactory {
 			}
 		}
 
-		Zeraf zer = null;
-
-		switch (system) {
-			case ATLAS:
-			zer = new ZerafAtlas(uid, conf[1], conf[0]);
-			break;
-		
-			case MUSEO:
-			zer = new ZerafMuseo(uid, conf[1], conf[0]);
-			break;
-		}
-
-		return zer;
+		return new Zeraf(uid, conf[1], conf[0]);
 	}
 	
 	/**
