@@ -1,3 +1,9 @@
 bin/
 logs/
+lib/
+config/
+backup/
 .vscode/
+/*.jar
+
+Main.java
