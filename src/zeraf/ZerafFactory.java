@@ -31,13 +31,12 @@ public class ZerafFactory {
 
 	/**
 	 * Crea un objeto Zeraf, así como el archivo de configuración necesario para su funcionamiento solicitando los datos requeridos para ello.
-	 * @param system El sistema con el que conectar.
 	 * @param uid El id del usuario.
 	 * @param group El id del grupo. Prevalece el del archivo de configuración.
 	 * 
 	 * @return Una instancia de <code>Zeraf</code>.
 	 */
-	public static Zeraf createZeraf(ESistema system, String uid, String group)
+	public static Zeraf createZeraf(String uid, String group)
 	{
 		ZerafFactory.createFile(ZerafFactory.CONFIG_PATH);
 		ZerafFactory.createFile(ZerafFactory.BACKUP_PATH + "/" + group + "_" + uid + ".bkp");

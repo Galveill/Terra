@@ -200,7 +200,7 @@ public class Zeraf {
 			json = new String(deco);
 			
 		} catch (IOException e) {
-			System.err.println("Error al escribir el fichero de backap de los datos.");
+			System.err.println("Error al escribir el fichero de backup de los datos.");
 			e.printStackTrace();
 		}
 
