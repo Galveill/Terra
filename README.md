@@ -2,7 +2,7 @@
 Librería base para los sistemas educativos de Galveill.
 
 ## Sistemas soportados
--Archaios (Completo)
+-Archaios (Completo)<br>
 -Ravaura (En proceso. Solo conexión)
 
 # Dependencias
