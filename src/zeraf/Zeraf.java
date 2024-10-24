@@ -3,6 +3,7 @@ package zeraf;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,6 +30,8 @@ public class Zeraf {
 	protected final String group;
 	/** La dirección de servidor */
 	protected final String url;
+	/** La ruta de la carpeta de backups. */
+	protected static final String BACKUP_PATH = "backup/";
 
 	/**
 	 * Constructor parametrizado.
@@ -96,12 +99,16 @@ public class Zeraf {
 
 	/**
 	 * Envía los datos al servidor.
+	 * Si hay datos de respaldo almacenados, los intenta enviar antes que los facilitados.
+	 * Si hay un fallo de conexión con el servidor, crea un fichero de respaldo con los datos.
+	 * 
 	 * @param data Los datos a enviar.
 	 * @return El código de respuesta del servidor.
 	 */
 	protected EMsgCodes sendData(String data)
 	{
 		EMsgCodes msgret = EMsgCodes.ERROR_CONNECTION;
+		this.recoverData();
 
 		HttpURLConnection con = null;
 		DataOutputStream dos = null;
@@ -154,6 +161,7 @@ public class Zeraf {
 		if(msgret == EMsgCodes.ERROR_CONNECTION)
 		{
 			System.out.println("No se han podido enviar los datos, se almacenan en el sistema de backup.");
+			this.backupData(data);
 		}
 
 		return msgret;
@@ -163,20 +171,21 @@ public class Zeraf {
 	 * Guarda en un fichero JSON los datos que se enviarían a un servidor.
 	 * Método de salvaguarda en caso de que haya un fallo de conexión.
 	 * No deben guardarse datos incorrectos.
-	 * @param data Los datos a guardar.
+	 * @param json Los datos a guardar en formato JSON.
 	 */
-	public <T> void backupData(T data)
+	protected void backupData(String json)
 	{
-		String json = new MessageWrapper<T>(this.uid, this.group, data).getJSON();
+		String bkp = Zeraf.BACKUP_PATH + "/" + group + "_" + uid + ".bkp";
+		ZerafFactory.createFile(bkp);
 
 		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-			new FileOutputStream(ZerafFactory.BACKUP_PATH + "/" + this.group + "_" + this.uid + ".bkp"), "UTF-8")
+			new FileOutputStream(bkp), "UTF-8")
 		)) {
 			String b64 = Base64.getEncoder().encodeToString(json.getBytes());
 			bw.write(b64);
 			bw.flush();
 		} catch (IOException e) {
-			System.err.println("Error al escribir el fichero de backap de los datos.");
+			System.err.println("Error al escribir el fichero de respaldo de los datos.");
 			e.printStackTrace();
 		}
 	}
@@ -184,27 +193,31 @@ public class Zeraf {
 	/**
 	 * Recupera los datos del backup e intenta enviarlos al servidor.
 	 */
-	public void recoverData()
+	protected void recoverData()
 	{
-		String json = "";
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(
-			new FileInputStream(ZerafFactory.BACKUP_PATH + "/" + this.group + "_" + this.uid + ".bkp"), "UTF-8")
-		)) {
-			StringBuilder data = new StringBuilder();
-			String line;
-			while ((line = br.readLine()) != null) {
-				data.append(line);
+		File bkp = new File(Zeraf.BACKUP_PATH + "/" + this.group + "_" + this.uid + ".bkp");
+		if(bkp.exists())
+		{
+			String json = "";
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(
+				new FileInputStream(bkp), "UTF-8")
+			)) {
+				StringBuilder data = new StringBuilder();
+				String line;
+				while ((line = br.readLine()) != null) {
+					data.append(line);
+				}
+	
+				byte[] deco = Base64.getDecoder().decode(data.toString());
+				json = new String(deco);
+				
+			} catch (IOException e) {
+				System.err.println("Error al recuperar el fichero de respaldo de los datos.");
+				e.printStackTrace();
 			}
-
-			byte[] deco = Base64.getDecoder().decode(data.toString());
-			json = new String(deco);
-			
-		} catch (IOException e) {
-			System.err.println("Error al escribir el fichero de backup de los datos.");
-			e.printStackTrace();
+			bkp.delete();
+			this.sendData(json);
 		}
-
-		this.sendData(json);
 	}
 
 	@Override

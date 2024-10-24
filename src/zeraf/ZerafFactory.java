@@ -26,8 +26,6 @@ public class ZerafFactory {
 
 	/** La ruta del fichero de configuración. */
 	private static final String CONFIG_PATH = "config/Zeraf.conf";
-	/** La ruta de la carpeta de backups. */
-	static final String BACKUP_PATH = "backup/";
 
 	/**
 	 * Crea un objeto Zeraf, así como el archivo de configuración necesario para su funcionamiento solicitando los datos requeridos para ello.
@@ -39,7 +37,6 @@ public class ZerafFactory {
 	public static Zeraf createZeraf(String uid, String group)
 	{
 		ZerafFactory.createFile(ZerafFactory.CONFIG_PATH);
-		ZerafFactory.createFile(ZerafFactory.BACKUP_PATH + "/" + group + "_" + uid + ".bkp");
 
 		String[] conf = ZerafFactory.readConfig();
 		if(conf == null)
@@ -113,7 +110,7 @@ public class ZerafFactory {
 	 * Crea un fichero si no existe y su ruta completa.
 	 * @param path La ruta completa del fichero a crear.
 	 */
-	private static void createFile(String path)
+	static void createFile(String path)
 	{
 		File f = new File(path);
 		if(!f.exists())
