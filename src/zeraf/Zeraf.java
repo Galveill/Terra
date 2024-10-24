@@ -168,6 +168,19 @@ public class Zeraf {
 	}
 
 	/**
+	 * 
+	 * @param params Los parámetros necesarios para la solicitud, lo que se quiere pedir. Cada sistema tiene sus posibles.
+	 * 
+	 * @return Los datos solicitados en formato JSON o cadena vacía si ha ocurrido algún error.
+	 */
+	protected <T> String receiveData(String params, T container)
+	{
+		String data = "";
+		//TODO Implementar el sistema para recibir los datos del servidor.
+		return data;
+	}
+
+	/**
 	 * Guarda en un fichero JSON los datos que se enviarían a un servidor.
 	 * Método de salvaguarda en caso de que haya un fallo de conexión.
 	 * No deben guardarse datos incorrectos.
