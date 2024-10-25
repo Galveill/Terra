@@ -1,5 +1,9 @@
 package zeraf.solicitudes;
 
-public enum EAtlasParams {
+/**
+ * Parámetros posibles de solicitud de datos del servidor Atlas de Ravaura.
+ * @author Adrián.
+ */
+public enum EAtlasParams implements IZerafParams {
 	
 }

@@ -9,14 +9,21 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+
 import messages.EMsgCodes;
 import messages.MessageWrapper;
+import zeraf.solicitudes.IZerafParams;
 
 /**
  * Comunicación con los servidores de los sistemas.
@@ -168,16 +175,21 @@ public class Zeraf {
 	}
 
 	/**
-	 * 
+	 * Solicita los datos al servidor 
 	 * @param params Los parámetros necesarios para la solicitud, lo que se quiere pedir. Cada sistema tiene sus posibles.
-	 * 
+	 * @param container La clase que servirá de contenedor de los datos de solicitud.
 	 * @return Los datos solicitados en formato JSON o cadena vacía si ha ocurrido algún error.
-	 */
-	protected <T> String receiveData(String params, T container)
+	 * @throws JsonSyntaxException  Si la clase facilitada en <code>container</code> no es compatible con la información solicitada en <code>params</code>.
+	*/
+	public static <T> T receiveData(IZerafParams params, Class<T> container) throws JsonSyntaxException
 	{
 		String data = "";
-		//TODO Implementar el sistema para recibir los datos del servidor.
-		return data;
+		//TODO Pedir dato al servidor.
+		String json = "{\"valor\": 5}";
+
+		Gson gson = new GsonBuilder().create();
+		T inst = gson.fromJson(json, container);
+		return inst;
 	}
 
 	/**
