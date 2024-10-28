@@ -9,8 +9,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -140,23 +138,25 @@ public class Zeraf {
 
 	/**
 	 * Solicita los datos al servidor.
-	 * @param <T> Una clase contenedora.
+	 * @param <I> El contenedor de los datos a pasar.
+	 * @param <R> El objeto contenedor a recibir, el DTO.
 	 * @param params Los parámetros necesarios para la solicitud, lo que se quiere pedir. Cada sistema tiene sus posibles.
 	 * @param extra Datos extra a facilitar al servidor.
 	 * @param container La clase que servirá de contenedor de los datos de solicitud.
 	 * @return Una instancia de la clase facilitada con los datos almacenados en su interior. Null si ha ocurrido algún error o no hay datos que solicitar.
 	 * @throws JsonSyntaxException  Si la clase facilitada en <code>container</code> no es compatible con la información solicitada en <code>params</code>.
 	*/
-	public <T> T receiveData(IZerafParams params, String extra, Class<T> container) throws JsonSyntaxException
+	public <I, R> R receiveData(IZerafParams params, I extra, Class<R> container) throws JsonSyntaxException
 	{
-		String data = ""; //TODO Crear en base a params y el extra
-		T inst = null;
+		Gson gson = new GsonBuilder().create();
+		
+		String data = "{\"" + params.getParam() + "\":" + params + ",\" extra\":" + gson.toJson(extra) + "}";
+		R inst = null;
 		try {
 			String response = this.HTTPRequest(this.url + "/retriever.php", data);
 
 			if(!response.equals(""))
 			{
-				Gson gson = new GsonBuilder().create();
 				inst = gson.fromJson(response, container);
 			}
 		} catch (Exception e) {
