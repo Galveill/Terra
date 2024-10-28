@@ -117,11 +117,70 @@ public class Zeraf {
 		EMsgCodes msgret = EMsgCodes.ERROR_CONNECTION;
 		this.recoverData();
 
+		try {
+			String response = this.HTTPRequest(this.url + "/receiver.php", data);
+
+			if(!response.equals(""))
+			{
+				int rescode = Integer.parseInt(response);
+				msgret = EMsgCodes.values()[rescode];
+			}
+		} catch (Exception e) {
+			msgret = EMsgCodes.ERROR_CONNECTION;
+		}
+
+		if(msgret == EMsgCodes.ERROR_CONNECTION)
+		{
+			System.out.println("No se han podido enviar los datos, se almacenan en el sistema de backup.");
+			this.backupData(data);
+		}
+
+		return msgret;
+	}
+
+	/**
+	 * Solicita los datos al servidor.
+	 * @param <T> Una clase contenedora.
+	 * @param params Los parámetros necesarios para la solicitud, lo que se quiere pedir. Cada sistema tiene sus posibles.
+	 * @param extra Datos extra a facilitar al servidor.
+	 * @param container La clase que servirá de contenedor de los datos de solicitud.
+	 * @return Una instancia de la clase facilitada con los datos almacenados en su interior. Null si ha ocurrido algún error o no hay datos que solicitar.
+	 * @throws JsonSyntaxException  Si la clase facilitada en <code>container</code> no es compatible con la información solicitada en <code>params</code>.
+	*/
+	public <T> T receiveData(IZerafParams params, String extra, Class<T> container) throws JsonSyntaxException
+	{
+		String data = ""; //TODO Crear en base a params y el extra
+		T inst = null;
+		try {
+			String response = this.HTTPRequest(this.url + "/retriever.php", data);
+
+			if(!response.equals(""))
+			{
+				Gson gson = new GsonBuilder().create();
+				inst = gson.fromJson(response, container);
+			}
+		} catch (Exception e) {
+			inst = null;
+		}
+
+		return inst;
+	}
+
+	/**
+	 * Envía los datos al servidor devolviendo la respuesta dada.
+	 * @param fullUrl La dirección completa al servidor, incluyendo la página concreta.
+	 * @param data La información a enviar.
+	 * @return El contenido en formato texto o cadena vacía si hay cualquier error.
+	 */
+	protected String HTTPRequest(String fullUrl, String data)
+	{
+		String res = "";
+
 		HttpURLConnection con = null;
 		DataOutputStream dos = null;
 		BufferedReader in = null;
 		try {
-			URL obj = new URI(this.url + "/receiver.php").toURL();
+			URL obj = new URI(fullUrl).toURL();
 			con = (HttpURLConnection) obj.openConnection();
 
 			// Configurar la conexión
@@ -139,17 +198,16 @@ public class Zeraf {
 			if(responseCode == 200)
 			{
 				in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-				String inputLine;
-
-				int rescode = Integer.parseInt(in.readLine().toString());
-				msgret = EMsgCodes.values()[rescode];
-				while ((inputLine = in.readLine()) != null) {
-					System.err.println(inputLine);
+				StringBuilder inputLine = new StringBuilder();
+				String line = "";
+				while ((line = in.readLine()) != null) {
+					inputLine.append(line);
 				}
+				res = inputLine.toString();
 			}
 
 		} catch (Exception e) {
-			msgret = EMsgCodes.ERROR_CONNECTION;
+			res = "";
 		} finally {
 			if(dos != null) {
 				try {
@@ -165,31 +223,7 @@ public class Zeraf {
 				} catch (IOException e) {}
 			}
 		}
-		if(msgret == EMsgCodes.ERROR_CONNECTION)
-		{
-			System.out.println("No se han podido enviar los datos, se almacenan en el sistema de backup.");
-			this.backupData(data);
-		}
-
-		return msgret;
-	}
-
-	/**
-	 * Solicita los datos al servidor 
-	 * @param params Los parámetros necesarios para la solicitud, lo que se quiere pedir. Cada sistema tiene sus posibles.
-	 * @param container La clase que servirá de contenedor de los datos de solicitud.
-	 * @return Los datos solicitados en formato JSON o cadena vacía si ha ocurrido algún error.
-	 * @throws JsonSyntaxException  Si la clase facilitada en <code>container</code> no es compatible con la información solicitada en <code>params</code>.
-	*/
-	public static <T> T receiveData(IZerafParams params, Class<T> container) throws JsonSyntaxException
-	{
-		String data = "";
-		//TODO Pedir dato al servidor.
-		String json = "{\"valor\": 5}";
-
-		Gson gson = new GsonBuilder().create();
-		T inst = gson.fromJson(json, container);
-		return inst;
+		return res;
 	}
 
 	/**
