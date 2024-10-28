@@ -6,8 +6,4 @@ package zeraf.solicitudes;
  */
 public interface IZerafParams {
 	
-	/**
-	 * @return El texto del parámetro a enviar al servidor.
-	 */
-	public String getParam();
 }

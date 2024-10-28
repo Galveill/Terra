@@ -5,25 +5,7 @@ package zeraf.solicitudes;
  * @author Adrián.
  */
 public enum EAtlasParams implements IZerafParams {
-	RUTA("Ruta"),
-	TERRENO("Terreno");
+	RUTA,
+	TERRENO;
 	//TODO Completar con lo necesario.
-
-	/** El texto **/
-	private String value;
-	
-	/**
-		Constructor básico
-		@param msg El texto.
-	*/
-	private EAtlasParams(String msg)
-	{
-		this.value = msg;
-	}
-
-	@Override
-	public String getParam() {
-		return value;
-	}
-	
 }

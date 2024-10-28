@@ -20,7 +20,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 import messages.EMsgCodes;
-import messages.MessageWrapper;
+import messages.RequestMessageWrapper;
+import messages.SendMessageWrapper;
 import zeraf.solicitudes.IZerafParams;
 
 /**
@@ -98,7 +99,7 @@ public class Zeraf {
 	 */
 	public <T> EMsgCodes sendData(T data)
 	{
-		String json = new MessageWrapper<T>(this.uid, this.group, data).getJSON();
+		String json = new SendMessageWrapper<T>(this.uid, this.group, data).getJSON();
 		return this.sendData(json);
 	}
 
@@ -148,15 +149,15 @@ public class Zeraf {
 	*/
 	public <I, R> R receiveData(IZerafParams params, I extra, Class<R> container) throws JsonSyntaxException
 	{
-		Gson gson = new GsonBuilder().create();
+		String json = new RequestMessageWrapper<I>(this.uid, this.group, params, extra).getJSON();
 		
-		String data = "{\"" + params.getParam() + "\":" + params + ",\" extra\":" + gson.toJson(extra) + "}";
 		R inst = null;
 		try {
-			String response = this.HTTPRequest(this.url + "/retriever.php", data);
+			String response = this.HTTPRequest(this.url + "/retriever.php", json);
 
 			if(!response.equals(""))
 			{
+				Gson gson = new GsonBuilder().create();
 				inst = gson.fromJson(response, container);
 			}
 		} catch (Exception e) {
