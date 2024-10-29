@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -17,12 +18,15 @@ import java.util.Base64;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import messages.EMsgCodes;
 import messages.RequestMessageWrapper;
 import messages.ResponseWrapper;
 import messages.SendMessageWrapper;
+import zeraf.solicitudes.EUsersParams;
 import zeraf.solicitudes.IZerafParams;
 
 /**
@@ -163,39 +167,49 @@ public class Zeraf {
 	*/
 	public <I, R> ResponseWrapper<R> receiveData(IZerafParams params, I extra, Class<R> container) throws JsonSyntaxException
 	{
-		R inst = null;
+		ResponseWrapper<R> res = new ResponseWrapper<R>(EMsgCodes.ERROR_CONNECTION, null);
 		if(!this.retriever.equals(""))
 		{
 			String json = new RequestMessageWrapper<I>(this.uid, this.group, params, extra).getJSON();
-
 			try {
 				String response = this.HTTPRequest(this.url + "/" + this.retriever, json);
 
 				if(!response.equals(""))
 				{
-					Gson gson = new GsonBuilder().create();
-					inst = gson.fromJson(response, container);
+					res = new ResponseWrapper<R>(response, container);
 				}
 			} catch (Exception e) {
-				inst = null;
+				res = null;
 			}
 		}
 
-		return new ResponseWrapper<R>(
-			(inst == null ? EMsgCodes.ERROR_CONNECTION : EMsgCodes.CORRECT),
-			inst
-		);
+		return res;
 	}
 
-	//TODO Javadoc checkUser
-	public ResponseWrapper<Boolean> checkUser() //TODO Cambiar respuesta a Wrapper
+	/**
+	 * Verifica si existe el usuario.
+	 * @return El envoltorio de respuesta con el estado del servidor y si el usuario está registrado en el grupo. El estado del servidor también indicará si el usuario está bloqueado.
+	 */
+	public ResponseWrapper<Boolean> existUser()
 	{
+		ResponseWrapper<Boolean> res = new ResponseWrapper<>(EMsgCodes.ERROR_CONNECTION, false);
+
 		if(!this.register.equals(""))
 		{
-			//TODO Verificar si el usuario en ese grupo existe
-			//TODO Puede devolver que el usuario o grupo es incorrecto o que está bloqueado.
+			String json = new RequestMessageWrapper<String>(this.uid, this.group, EUsersParams.EXIST, "").getJSON();
+			try {
+				String response = this.HTTPRequest(this.url + "/" + this.register, json);
+
+				if(!response.equals(""))
+				{
+					res = new ResponseWrapper<>(response, Boolean.class);
+				}
+			} catch (Exception e) {
+				res = new ResponseWrapper<>(EMsgCodes.ERROR_CONNECTION, false);
+			}
 		}
-		return null;
+		
+		return res;
 	}
 
 	//TODO Javadoc registerUser
@@ -214,7 +228,7 @@ public class Zeraf {
 	 * @param data La información a enviar.
 	 * @return El contenido en formato texto o cadena vacía si hay cualquier error.
 	 */
-	protected String HTTPRequest(String fullUrl, String data) //TODO devolver un objeto respuesta con el código y el mensaje.
+	protected String HTTPRequest(String fullUrl, String data)
 	{
 		String res = "";
 
