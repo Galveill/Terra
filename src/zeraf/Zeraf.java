@@ -21,6 +21,7 @@ import com.google.gson.JsonSyntaxException;
 
 import messages.EMsgCodes;
 import messages.RequestMessageWrapper;
+import messages.ResponseWrapper;
 import messages.SendMessageWrapper;
 import zeraf.solicitudes.IZerafParams;
 
@@ -108,9 +109,9 @@ public class Zeraf {
 	 * Envía los datos al servidor.
 	 * @param <T> Cualquier objeto que siga el formato estipulado por el servidor.
 	 * @param data Los datos a enviar.
-	 * @return El código de respuesta del servidor.
+	 * @return La respuesta del servidor.
 	 */
-	public <T> EMsgCodes sendData(T data)
+	public <T> ResponseWrapper<String> sendData(T data)
 	{
 		String json = new SendMessageWrapper<T>(this.uid, this.group, data).getJSON();
 		return this.sendData(json);
@@ -122,9 +123,9 @@ public class Zeraf {
 	 * Si hay un fallo de conexión con el servidor, crea un fichero de respaldo con los datos.
 	 * 
 	 * @param data Los datos a enviar.
-	 * @return El código de respuesta del servidor.
+	 * @return La respuesta del servidor.
 	 */
-	protected EMsgCodes sendData(String data)
+	protected ResponseWrapper<String> sendData(String data)
 	{
 		EMsgCodes msgret = EMsgCodes.ERROR_CONNECTION;
 		this.recoverData();
@@ -147,7 +148,7 @@ public class Zeraf {
 			this.backupData(data);
 		}
 
-		return msgret;
+		return new ResponseWrapper<String>(msgret, "");
 	}
 
 	/**
@@ -157,10 +158,10 @@ public class Zeraf {
 	 * @param params Los parámetros necesarios para la solicitud, lo que se quiere pedir. Cada sistema tiene sus posibles.
 	 * @param extra Datos extra a facilitar al servidor.
 	 * @param container La clase que servirá de contenedor de los datos de solicitud.
-	 * @return Una instancia de la clase facilitada con los datos almacenados en su interior. Null si ha ocurrido algún error o no hay datos que solicitar.
+	 * @return El envoltorio de respuesta con una instancia de la clase facilitada con los datos almacenados en su interior. Estos serán null si ha ocurrido algún error o no hay datos que solicitar.
 	 * @throws JsonSyntaxException  Si la clase facilitada en <code>container</code> no es compatible con la información solicitada en <code>params</code>.
 	*/
-	public <I, R> R receiveData(IZerafParams params, I extra, Class<R> container) throws JsonSyntaxException
+	public <I, R> ResponseWrapper<R> receiveData(IZerafParams params, I extra, Class<R> container) throws JsonSyntaxException
 	{
 		R inst = null;
 		if(!this.retriever.equals(""))
@@ -180,27 +181,30 @@ public class Zeraf {
 			}
 		}
 
-		return inst;
+		return new ResponseWrapper<R>(
+			(inst == null ? EMsgCodes.ERROR_CONNECTION : EMsgCodes.CORRECT),
+			inst
+		);
 	}
 
 	//TODO Javadoc checkUser
-	public boolean checkUser()
+	public ResponseWrapper<Boolean> checkUser() //TODO Cambiar respuesta a Wrapper
 	{
 		if(!this.register.equals(""))
 		{
 			//TODO Verificar si el usuario en ese grupo existe
 		}
-		return false;
+		return null;
 	}
 
 	//TODO Javadoc registerUser
-	public boolean registerUser(String name)
+	public ResponseWrapper<Boolean> registerUser(String name) //TODO Cambiar respuesta a Wrapper
 	{
 		if(!this.register.equals(""))
 		{
 			//TODO Enviar los datos para registrar el usuario
 		}
-		return false;
+		return null;
 	}
 
 	/**
