@@ -38,18 +38,30 @@ public class Zeraf {
 	protected final String url;
 	/** La ruta de la carpeta de backups. */
 	protected static final String BACKUP_PATH = "backup/";
+	/** La página del servidor encargada de recibir los datos. */
+	protected final String receiver;
+	/** La página del servidor encargada de suministrar los datos. */
+	protected final String retriever;
+	/** La página del servidor encargada de gestionar los usuarios. */
+	protected final String register;
 
 	/**
 	 * Constructor parametrizado.
 	 * @param uid El id del usuario.
 	 * @param group El id del grupo.
 	 * @param url La dirección del servidor.
+	 * @param receiver La página del servidor encargada de recibir los datos.
+	 * @param retriever La página del servidor encargada de suministrar los datos.
+	 * @param register La página del servidor encargada de gestionar los usuarios.
 	 */
-	Zeraf(String uid, String group, String url)
+	Zeraf(String uid, String group, String url, String receiver, String retriever, String register)
 	{
 		this.uid = uid;
 		this.group = group;
 		this.url = url;
+		this.receiver = receiver;
+		this.retriever = retriever;
+		this.register = register;
 	}
 
 	/**
@@ -94,6 +106,7 @@ public class Zeraf {
 
 	/**
 	 * Envía los datos al servidor.
+	 * @param <T> Cualquier objeto que siga el formato estipulado por el servidor.
 	 * @param data Los datos a enviar.
 	 * @return El código de respuesta del servidor.
 	 */
@@ -117,7 +130,7 @@ public class Zeraf {
 		this.recoverData();
 
 		try {
-			String response = this.HTTPRequest(this.url + "/receiver.php", data);
+			String response = this.HTTPRequest(this.url + "/" + this.receiver, data);
 
 			if(!response.equals(""))
 			{
@@ -149,22 +162,45 @@ public class Zeraf {
 	*/
 	public <I, R> R receiveData(IZerafParams params, I extra, Class<R> container) throws JsonSyntaxException
 	{
-		String json = new RequestMessageWrapper<I>(this.uid, this.group, params, extra).getJSON();
-		
 		R inst = null;
-		try {
-			String response = this.HTTPRequest(this.url + "/retriever.php", json);
+		if(!this.retriever.equals(""))
+		{
+			String json = new RequestMessageWrapper<I>(this.uid, this.group, params, extra).getJSON();
 
-			if(!response.equals(""))
-			{
-				Gson gson = new GsonBuilder().create();
-				inst = gson.fromJson(response, container);
+			try {
+				String response = this.HTTPRequest(this.url + "/" + this.retriever, json);
+
+				if(!response.equals(""))
+				{
+					Gson gson = new GsonBuilder().create();
+					inst = gson.fromJson(response, container);
+				}
+			} catch (Exception e) {
+				inst = null;
 			}
-		} catch (Exception e) {
-			inst = null;
 		}
 
 		return inst;
+	}
+
+	//TODO Javadoc checkUser
+	public boolean checkUser()
+	{
+		if(!this.register.equals(""))
+		{
+			//TODO Verificar si el usuario en ese grupo existe
+		}
+		return false;
+	}
+
+	//TODO Javadoc registerUser
+	public boolean registerUser(String name)
+	{
+		if(!this.register.equals(""))
+		{
+			//TODO Enviar los datos para registrar el usuario
+		}
+		return false;
 	}
 
 	/**
@@ -173,7 +209,7 @@ public class Zeraf {
 	 * @param data La información a enviar.
 	 * @return El contenido en formato texto o cadena vacía si hay cualquier error.
 	 */
-	protected String HTTPRequest(String fullUrl, String data)
+	protected String HTTPRequest(String fullUrl, String data) //TODO devolver un objeto respuesta con el código y el mensaje.
 	{
 		String res = "";
 
