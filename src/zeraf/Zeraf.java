@@ -193,6 +193,7 @@ public class Zeraf {
 		if(!this.register.equals(""))
 		{
 			//TODO Verificar si el usuario en ese grupo existe
+			//TODO Puede devolver que el usuario o grupo es incorrecto o que está bloqueado.
 		}
 		return null;
 	}
