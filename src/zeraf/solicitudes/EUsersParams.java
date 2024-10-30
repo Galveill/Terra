@@ -5,5 +5,6 @@ package zeraf.solicitudes;
  * @author Adrián.
  */
 public enum EUsersParams implements IZerafParams {
-	EXIST;
+	EXIST,
+	REGISTER;
 }

@@ -9,17 +9,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import messages.EMsgCodes;
@@ -192,13 +187,34 @@ public class Zeraf {
 	 */
 	public ResponseWrapper<Boolean> existUser()
 	{
+		RequestMessageWrapper<String> request = new RequestMessageWrapper<String>(this.uid, this.group, EUsersParams.EXIST, "");
+		return this.userSendData(request);
+	}
+
+	/**
+	 * Registra al usuario en el grupo concreto.
+	 * @param name El nombre por el que quiere ser identificado el usuario.
+	 * @return El envoltorio de respuesta con el estado del servidor y si el usuario se ha podido registrar. El estado del servidor también indicará si el usuario está bloqueado.
+	 */
+	public ResponseWrapper<Boolean> registerUser(String name)
+	{
+		RequestMessageWrapper<String> request = new RequestMessageWrapper<String>(this.uid, this.group, EUsersParams.REGISTER, name);
+		return this.userSendData(request);
+	}
+
+	/**
+	 * Envía la petición de datos de usuarios al servidor.
+	 * @param request La petición a enviar.
+	 * @return El envoltorio de respuesta con el estado del servidor y el resultado de la operación. El estado del servidor también indicará si el usuario está bloqueado.
+	 */
+	protected ResponseWrapper<Boolean> userSendData(RequestMessageWrapper<String> request)
+	{
 		ResponseWrapper<Boolean> res = new ResponseWrapper<>(EMsgCodes.ERROR_CONNECTION, false);
 
 		if(!this.register.equals(""))
 		{
-			String json = new RequestMessageWrapper<String>(this.uid, this.group, EUsersParams.EXIST, "").getJSON();
 			try {
-				String response = this.HTTPRequest(this.url + "/" + this.register, json);
+				String response = this.HTTPRequest(this.url + "/" + this.register, request.getJSON());
 
 				if(!response.equals(""))
 				{
@@ -208,18 +224,7 @@ public class Zeraf {
 				res = new ResponseWrapper<>(EMsgCodes.ERROR_CONNECTION, false);
 			}
 		}
-		
 		return res;
-	}
-
-	//TODO Javadoc registerUser
-	public ResponseWrapper<Boolean> registerUser(String name) //TODO Cambiar respuesta a Wrapper
-	{
-		if(!this.register.equals(""))
-		{
-			//TODO Enviar los datos para registrar el usuario
-		}
-		return null;
 	}
 
 	/**
