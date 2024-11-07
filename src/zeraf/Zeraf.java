@@ -182,7 +182,7 @@ public class Zeraf {
 	}
 
 	/**
-	 * Verifica si existe el usuario.
+	 * Verifica si existe el usuario en ese servidor y grupo.
 	 * @return El envoltorio de respuesta con el estado del servidor y si el usuario está registrado en el grupo. El estado del servidor también indicará si el usuario está bloqueado.
 	 */
 	public ResponseWrapper<Boolean> existUser()

@@ -7,3 +7,6 @@ Librería base para los sistemas educativos de Galveill.
 
 # Dependencias
 -Gson 2.10.1 o superior.
+
+# Documentos
+La carpeta docs contiene el manual de usuario y el documento descriptivo y guía de procedimientos.
