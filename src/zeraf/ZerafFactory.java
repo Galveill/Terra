@@ -29,12 +29,13 @@ public class ZerafFactory {
 
 	/**
 	 * Crea un objeto Zeraf, así como el archivo de configuración necesario para su funcionamiento solicitando los datos requeridos para ello.
+	 * @param system El sistema al que va a conectarse Zeraf.
 	 * @param uid El id del usuario.
 	 * @param group El id del grupo. Prevalece el del archivo de configuración.
 	 * 
 	 * @return Una instancia de <code>Zeraf</code>.
 	 */
-	public static Zeraf createZeraf(String uid, String group)
+	public static Zeraf createZeraf(ESistema system, String uid, String group)
 	{
 		ZerafFactory.createFile(ZerafFactory.CONFIG_PATH);
 
@@ -45,7 +46,7 @@ public class ZerafFactory {
 			boolean corr = false;
 			Scanner sc = new Scanner(System.in);
 			while(!corr) {
-				System.out.println("Introduce la URL completa al servidor, incluyendo el protocolo y el puerto (http://localhost:8080):");
+				System.out.print("Introduce la URL completa al servidor, incluyendo el protocolo y el puerto (http://localhost:8080/Servidor): ");
 				String txt = sc.nextLine();
 				try {
 					URL murl = new URI(txt).toURL();
@@ -58,7 +59,17 @@ public class ZerafFactory {
 			}
 		}
 
-		return new Zeraf(uid, conf[1], conf[0]);
+		Zeraf zeraf = null;
+		switch (system) {
+			case MUSEO:
+				zeraf = new Zeraf(uid, conf[1], conf[0], "receiver.php", "", "");
+			break;
+			case ATLAS:
+				zeraf = new Zeraf(uid, conf[1], conf[0], "receiver.php", "retriever.php", "register.php");
+			break;
+		}
+
+		return zeraf;
 	}
 	
 	/**

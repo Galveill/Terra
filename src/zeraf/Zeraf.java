@@ -15,8 +15,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
 
+import com.google.gson.JsonSyntaxException;
+
 import messages.EMsgCodes;
-import messages.MessageWrapper;
+import messages.RequestMessageWrapper;
+import messages.ResponseWrapper;
+import messages.SendMessageWrapper;
+import zeraf.solicitudes.EUsersParams;
+import zeraf.solicitudes.IZerafParams;
 
 /**
  * Comunicación con los servidores de los sistemas.
@@ -32,18 +38,30 @@ public class Zeraf {
 	protected final String url;
 	/** La ruta de la carpeta de backups. */
 	protected static final String BACKUP_PATH = "backup/";
+	/** La página del servidor encargada de recibir los datos. */
+	protected final String receiver;
+	/** La página del servidor encargada de suministrar los datos. */
+	protected final String retriever;
+	/** La página del servidor encargada de gestionar los usuarios. */
+	protected final String register;
 
 	/**
 	 * Constructor parametrizado.
 	 * @param uid El id del usuario.
 	 * @param group El id del grupo.
 	 * @param url La dirección del servidor.
+	 * @param receiver La página del servidor encargada de recibir los datos.
+	 * @param retriever La página del servidor encargada de suministrar los datos.
+	 * @param register La página del servidor encargada de gestionar los usuarios.
 	 */
-	Zeraf(String uid, String group, String url)
+	Zeraf(String uid, String group, String url, String receiver, String retriever, String register)
 	{
 		this.uid = uid;
 		this.group = group;
 		this.url = url;
+		this.receiver = receiver;
+		this.retriever = retriever;
+		this.register = register;
 	}
 
 	/**
@@ -88,12 +106,13 @@ public class Zeraf {
 
 	/**
 	 * Envía los datos al servidor.
+	 * @param <T> Cualquier objeto que siga el formato estipulado por el servidor.
 	 * @param data Los datos a enviar.
-	 * @return El código de respuesta del servidor.
+	 * @return La respuesta del servidor.
 	 */
-	public <T> EMsgCodes sendData(T data)
+	public <T> ResponseWrapper<String> sendData(T data)
 	{
-		String json = new MessageWrapper<T>(this.uid, this.group, data).getJSON();
+		String json = new SendMessageWrapper<T>(this.uid, this.group, data).getJSON();
 		return this.sendData(json);
 	}
 
@@ -103,18 +122,126 @@ public class Zeraf {
 	 * Si hay un fallo de conexión con el servidor, crea un fichero de respaldo con los datos.
 	 * 
 	 * @param data Los datos a enviar.
-	 * @return El código de respuesta del servidor.
+	 * @return La respuesta del servidor.
 	 */
-	protected EMsgCodes sendData(String data)
+	protected ResponseWrapper<String> sendData(String data)
 	{
 		EMsgCodes msgret = EMsgCodes.ERROR_CONNECTION;
 		this.recoverData();
+
+		try {
+			String response = this.HTTPRequest(this.url + "/" + this.receiver, data);
+
+			if(!response.equals(""))
+			{
+				int rescode = Integer.parseInt(response);
+				msgret = EMsgCodes.values()[rescode];
+			}
+		} catch (Exception e) {
+			msgret = EMsgCodes.ERROR_CONNECTION;
+		}
+
+		if(msgret == EMsgCodes.ERROR_CONNECTION)
+		{
+			System.out.println("No se han podido enviar los datos, se almacenan en el sistema de backup.");
+			this.backupData(data);
+		}
+
+		return new ResponseWrapper<String>(msgret, "");
+	}
+
+	/**
+	 * Solicita los datos al servidor.
+	 * @param <I> El contenedor de los datos a pasar.
+	 * @param <R> El objeto contenedor a recibir, el DTO.
+	 * @param params Los parámetros necesarios para la solicitud, lo que se quiere pedir. Cada sistema tiene sus posibles.
+	 * @param extra Datos extra a facilitar al servidor.
+	 * @param container La clase que servirá de contenedor de los datos de solicitud.
+	 * @return El envoltorio de respuesta con una instancia de la clase facilitada con los datos almacenados en su interior. Estos serán null si ha ocurrido algún error o no hay datos que solicitar.
+	 * @throws JsonSyntaxException  Si la clase facilitada en <code>container</code> no es compatible con la información solicitada en <code>params</code>.
+	*/
+	public <I, R> ResponseWrapper<R> receiveData(IZerafParams params, I extra, Class<R> container) throws JsonSyntaxException
+	{
+		ResponseWrapper<R> res = new ResponseWrapper<R>(EMsgCodes.ERROR_CONNECTION, null);
+		if(!this.retriever.equals(""))
+		{
+			String json = new RequestMessageWrapper<I>(this.uid, this.group, params, extra).getJSON();
+			try {
+				String response = this.HTTPRequest(this.url + "/" + this.retriever, json);
+
+				if(!response.equals(""))
+				{
+					res = new ResponseWrapper<R>(response, container);
+				}
+			} catch (Exception e) {
+				res = null;
+			}
+		}
+
+		return res;
+	}
+
+	/**
+	 * Verifica si existe el usuario en ese servidor y grupo.
+	 * @return El envoltorio de respuesta con el estado del servidor y si el usuario está registrado en el grupo. El estado del servidor también indicará si el usuario está bloqueado.
+	 */
+	public ResponseWrapper<Boolean> existUser()
+	{
+		RequestMessageWrapper<String> request = new RequestMessageWrapper<String>(this.uid, this.group, EUsersParams.EXIST, "");
+		return this.userSendData(request);
+	}
+
+	/**
+	 * Registra al usuario en el grupo concreto.
+	 * @param name El nombre por el que quiere ser identificado el usuario.
+	 * @return El envoltorio de respuesta con el estado del servidor y si el usuario se ha podido registrar. El estado del servidor también indicará si el usuario está bloqueado.
+	 */
+	public ResponseWrapper<Boolean> registerUser(String name)
+	{
+		RequestMessageWrapper<String> request = new RequestMessageWrapper<String>(this.uid, this.group, EUsersParams.REGISTER, name);
+		return this.userSendData(request);
+	}
+
+	/**
+	 * Envía la petición de datos de usuarios al servidor.
+	 * @param request La petición a enviar.
+	 * @return El envoltorio de respuesta con el estado del servidor y el resultado de la operación. El estado del servidor también indicará si el usuario está bloqueado.
+	 */
+	protected ResponseWrapper<Boolean> userSendData(RequestMessageWrapper<String> request)
+	{
+		ResponseWrapper<Boolean> res = new ResponseWrapper<>(EMsgCodes.ERROR_CONNECTION, false);
+
+		if(!this.register.equals(""))
+		{
+			try {
+				String response = this.HTTPRequest(this.url + "/" + this.register, request.getJSON());
+
+				if(!response.equals(""))
+				{
+					res = new ResponseWrapper<>(response, Boolean.class);
+				}
+			} catch (Exception e) {
+				res = new ResponseWrapper<>(EMsgCodes.ERROR_CONNECTION, false);
+			}
+		}
+		return res;
+	}
+
+	/**
+	 * Envía los datos al servidor devolviendo la respuesta dada.
+	 * @param fullUrl La dirección completa al servidor, incluyendo la página concreta.
+	 * @param data La información a enviar.
+	 * @return El contenido en formato texto o cadena vacía si hay cualquier error.
+	 */
+	protected String HTTPRequest(String fullUrl, String data)
+	{
+		String res = "";
 
 		HttpURLConnection con = null;
 		DataOutputStream dos = null;
 		BufferedReader in = null;
 		try {
-			URL obj = new URI(this.url + "/receiver.php").toURL();
+			URL obj = new URI(fullUrl).toURL();
 			con = (HttpURLConnection) obj.openConnection();
 
 			// Configurar la conexión
@@ -132,17 +259,16 @@ public class Zeraf {
 			if(responseCode == 200)
 			{
 				in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-				String inputLine;
-
-				int rescode = Integer.parseInt(in.readLine().toString());
-				msgret = EMsgCodes.values()[rescode];
-				while ((inputLine = in.readLine()) != null) {
-					System.err.println(inputLine);
+				StringBuilder inputLine = new StringBuilder();
+				String line = "";
+				while ((line = in.readLine()) != null) {
+					inputLine.append(line);
 				}
+				res = inputLine.toString();
 			}
 
 		} catch (Exception e) {
-			msgret = EMsgCodes.ERROR_CONNECTION;
+			res = "";
 		} finally {
 			if(dos != null) {
 				try {
@@ -158,13 +284,7 @@ public class Zeraf {
 				} catch (IOException e) {}
 			}
 		}
-		if(msgret == EMsgCodes.ERROR_CONNECTION)
-		{
-			System.out.println("No se han podido enviar los datos, se almacenan en el sistema de backup.");
-			this.backupData(data);
-		}
-
-		return msgret;
+		return res;
 	}
 
 	/**
