@@ -81,21 +81,17 @@ public class Zeraf {
 	{
 		HttpURLConnection con = null;
 		URL obj;
-		DataOutputStream dos = null;
 		try {
 			obj = new URI(this.url).toURL();
 			con = (HttpURLConnection) obj.openConnection();
-			con.setDoOutput(true);
-			dos = new DataOutputStream(con.getOutputStream());
-			return true;
+			con.setRequestMethod("HEAD");
+			con.setConnectTimeout(5000);
+			con.setReadTimeout(5000);
+			int responseCode = con.getResponseCode();
+			return (responseCode >= 200 && responseCode < 400);
 		} catch (IOException | URISyntaxException e) {
 			
 		}finally{
-			if(dos != null) {
-				try {
-					dos.close();
-				} catch (IOException e) {}
-			}
 			if (con != null) {
 				con.disconnect();
 			}
@@ -236,52 +232,45 @@ public class Zeraf {
 	protected String HTTPRequest(String fullUrl, String data)
 	{
 		String res = "";
-
 		HttpURLConnection con = null;
-		DataOutputStream dos = null;
-		BufferedReader in = null;
+
 		try {
 			URL obj = new URI(fullUrl).toURL();
 			con = (HttpURLConnection) obj.openConnection();
 
 			// Configurar la conexión
 			con.setRequestMethod("POST");
+			con.setConnectTimeout(5000);
+			con.setReadTimeout(5000);
 			con.setRequestProperty("Content-Type", "application/json");
 			con.setDoOutput(true);
 
 			// Enviar los datos
-			dos = new DataOutputStream(con.getOutputStream());
-			dos.writeBytes(data);
-			dos.flush();
+			try(DataOutputStream dos = new DataOutputStream(con.getOutputStream()))
+			{
+				dos.write(data.getBytes("UTF-8"));
+				dos.flush();
+			}
 
 			// Leer la respuesta
 			int responseCode = con.getResponseCode();
-			if(responseCode == 200)
+			if(responseCode >= 200 && responseCode < 300)
 			{
-				in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-				StringBuilder inputLine = new StringBuilder();
-				String line = "";
-				while ((line = in.readLine()) != null) {
-					inputLine.append(line);
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"))) {
+					StringBuilder inputLine = new StringBuilder();
+					String line = "";
+					while ((line = in.readLine()) != null) {
+						inputLine.append(line);
+					}
+					res = inputLine.toString();
 				}
-				res = inputLine.toString();
 			}
 
 		} catch (Exception e) {
 			res = "";
 		} finally {
-			if(dos != null) {
-				try {
-					dos.close();
-				} catch (IOException e) {}
-			}
 			if (con != null) {
 				con.disconnect();
-			}
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {}
 			}
 		}
 		return res;
