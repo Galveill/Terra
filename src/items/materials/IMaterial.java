@@ -1,4 +1,6 @@
-package items;
+package items.materials;
+
+import items.IObjeto;
 
 /**
  * El elemento es un material del sistema.

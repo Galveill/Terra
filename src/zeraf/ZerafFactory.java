@@ -44,6 +44,7 @@ public class ZerafFactory {
 		{
 			conf = new String[]{"", group};
 			boolean corr = false;
+			@SuppressWarnings("resource")
 			Scanner sc = new Scanner(System.in);
 			while(!corr) {
 				System.out.print("Introduce la URL completa al servidor, incluyendo el protocolo y el puerto (http://localhost:8080/Servidor): ");

@@ -6,4 +6,18 @@ package items;
  */
 public interface IObjeto {
 
+	/**
+	 * @return El código del objeto.
+	 */
+	public String getCode();
+
+	/**
+	 * @return El nombre del objeto.
+	 */
+	public String getName();
+
+	/**
+	 * @return La descripción del objeto.
+	 */
+	public String getDesc();
 }
