@@ -5,6 +5,11 @@ package zeraf.solicitudes;
  * @author Adrián.
  */
 public enum EAtlasParams implements IZerafParams {
+	CARAVANAS,
+	PERSONAJES,
+	EQUIPO,
+	COMIDA,
+	INVENTARIO,
 	RUTA,
 	TERRENO;
 	//TODO Completar con lo necesario.
