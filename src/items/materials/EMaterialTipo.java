@@ -5,17 +5,44 @@ package items.materials;
  * @author Adrián.
  */
 public enum EMaterialTipo {
-	MINERAL,
-	MADERA,
-	PIEDRA,
-	ARCILLA,
+	MINERAL("mineral"),
+	LINGOTE("lingote"),
+	GEMA("gema"),
 
-	CUERO,
-	PLUMA,
+	MADERA("madera"),
+	RESINA("resina"),
 
-	CERA,
+	PIEDRA("piedra"),
+	BLOQUE("bloque"),
 
-	CORAL,
-	PERLA,
-	NACAR;
+	ARCILLA("arcilla"),
+	CERAMICA("cerámica"),
+
+	PIEL("piel"),
+	CUERO("cuero"),
+	PLUMA("pluma"),
+
+	CERA("cera"),
+
+	CORAL("coral"),
+	PERLA("perla"),
+	NACAR("nácar");
+
+	/** El texto que contiene. */
+	private String txt;
+
+	/**
+	 * Constructor para darle el valor.
+	 * @param txt El texto que contiene.
+	 */
+	private EMaterialTipo(String txt)
+	{
+		this.txt = txt;
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.txt;
+	}
 }
