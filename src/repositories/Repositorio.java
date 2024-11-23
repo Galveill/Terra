@@ -15,10 +15,15 @@ public abstract class Repositorio<T extends IRegistrable> {
 	private Map<String, T> elems = new HashMap<>();
 
 	/**
-	 * Añade el elemento a la lista de roles del sistema.
+	 * Añade los elementos.
+	 */
+	public abstract void populate();
+
+	/**
+	 * Añade el elemento a la lista de elementos del sistema.
 	 * @param elem El elemento a registrar.
 	 */
-	public void register(T elem)
+	protected void register(T elem)
 	{
 		this.elems.put(elem.getCode(), elem);
 	}
@@ -48,4 +53,5 @@ public abstract class Repositorio<T extends IRegistrable> {
 	{
 		return new ArrayList<>(this.elems.values());
 	}
+
 }
