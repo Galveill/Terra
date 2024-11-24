@@ -6,6 +6,8 @@ import items.IObjeto;
  * El elemento es dinero del sistema.
  * @author Adrián.
  */
-public interface IDinero extends IObjeto<EDineroTipo> {
+public interface IDinero extends IObjeto {
 
+	@Override
+	public EDineroTipo getType();
 }

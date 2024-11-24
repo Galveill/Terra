@@ -1,10 +1,12 @@
 package items.materials;
 
+import items.IObjetoTipo;
+
 /**
  * Tipos de materiales.
  * @author Adrián.
  */
-public enum EMaterialTipo {
+public enum EMaterialTipo implements IObjetoTipo {
 	MINERAL("mineral"),
 	LINGOTE("lingote"),
 	GEMA("gema"),
