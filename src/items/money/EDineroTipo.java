@@ -1,10 +1,12 @@
 package items.money;
 
+import items.IObjetoTipo;
+
 /**
  * Tipos de muebles.
  * @author Adrián.
  */
-public enum EDineroTipo {
+public enum EDineroTipo implements IObjetoTipo {
 	MONEDA("moneda");
 
 	/** El texto que contiene. */

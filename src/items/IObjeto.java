@@ -4,7 +4,7 @@ package items;
  * El elemento es un objeto del sistema.
  * @author Adrián.
  */
-public interface IObjeto<T> {
+public interface IObjeto {
 
 	/**
 	 * @return El código del objeto.
@@ -24,5 +24,5 @@ public interface IObjeto<T> {
 	/**
 	 * @return El tipo de objeto de su propia jerarquía.
 	 */
-	public T getType();
+	public IObjetoTipo getType();
 }

@@ -1,10 +1,12 @@
 package items.equipment;
 
+import items.IObjetoTipo;
+
 /**
  * Tipos de equipo.
  * @author Adrián.
  */
-public enum EEquipoTipo {
+public enum EEquipoTipo implements IObjetoTipo {
 	ROPA("ropa"),
 	ARMADURA("armadura"),
 

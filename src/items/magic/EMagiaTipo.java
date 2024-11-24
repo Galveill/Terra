@@ -1,10 +1,12 @@
 package items.magic;
 
+import items.IObjetoTipo;
+
 /**
  * Tipos de magia.
  * @author Adrián.
  */
-public enum EMagiaTipo {
+public enum EMagiaTipo implements IObjetoTipo {
 	ELEMENTAL("elemental");
 
 	/** El texto que contiene. */

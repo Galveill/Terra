@@ -1,10 +1,12 @@
 package items.furniture;
 
+import items.IObjetoTipo;
+
 /**
  * Tipos de muebles.
  * @author Adrián.
  */
-public enum EMuebleTipo {
+public enum EMuebleTipo implements IObjetoTipo {
 	ADORNO("adorno"),
 	MAQUINARIA("maquinaria"),
 	ESTATUA("estatua");
