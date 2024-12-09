@@ -23,6 +23,14 @@ public enum EAmenaza {
 		this.lvl = lvl;
 	}
 
+	/**
+	 * @return El nivel de amenaza en valor numérico.
+	 */
+	public int getLvl()
+	{
+		return this.lvl;
+	}
+
 	public String toString()
 	{
 		return this.lvl + "";
