@@ -1,4 +1,4 @@
-package enums;
+package data.enemies;
 
 /**
  * El nivel de amenaza de una zona. Determina el número de enemigos que hay.
