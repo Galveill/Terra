@@ -1,4 +1,4 @@
-package enums;
+package data.quantity;
 
 /**
  * El nivel de abundancia de recursos del elemento.
