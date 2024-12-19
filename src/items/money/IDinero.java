@@ -10,4 +10,9 @@ public interface IDinero extends IObjeto {
 
 	@Override
 	public EDineroTipo getType();
+
+	/**
+	 * @return El valor de la moneda.
+	 */
+	public int getMonetaryValue();
 }
