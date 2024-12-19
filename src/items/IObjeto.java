@@ -1,15 +1,12 @@
 package items;
 
+import repositories.IRegistrable;
+
 /**
  * El elemento es un objeto del sistema.
  * @author Adrián.
  */
-public interface IObjeto {
-
-	/**
-	 * @return El código del objeto.
-	 */
-	public String getCode();
+public interface IObjeto extends IRegistrable {
 
 	/**
 	 * @return El nombre del objeto.
