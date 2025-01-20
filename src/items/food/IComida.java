@@ -8,5 +8,11 @@ import items.IObjeto;
  */
 public interface IComida extends IObjeto {
 
-	//TODO getType()
+	/**
+	 * @return Los subtipos de comida.
+	 */
+	public EComidaSubTipo[] getSubTypes();
+
+	@Override
+	public EComidaTipo getType();
 }
