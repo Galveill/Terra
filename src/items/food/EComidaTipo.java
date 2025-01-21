@@ -1,22 +1,16 @@
-package items.equipment;
+package items.food;
 
 import items.IObjetoTipo;
 
 /**
- * Tipos de equipo.
+ * Tipos de comida.
  * @author Adrián.
  */
-public enum EEquipoTipo implements IObjetoTipo {
-	ROPA("ropa"),
-	ARMADURA("armadura"),
-
-	HERRAMIENTA("herramienta"),
-	ARMA("arma"),
-	ACCESORIO("accesorio"),
+public enum EComidaTipo implements IObjetoTipo {
+	CRUDO("crudo"),
+	PROCESADO("procesado"),
+	COCINADO("cocinado");
 	
-	ESPECIFICO("específico"),
-	OTRO("otro");
-
 
 	/** El texto que contiene. */
 	private String txt;
@@ -25,7 +19,7 @@ public enum EEquipoTipo implements IObjetoTipo {
 	 * Constructor para darle el valor.
 	 * @param txt El texto que contiene.
 	 */
-	private EEquipoTipo(String txt)
+	private EComidaTipo(String txt)
 	{
 		this.txt = txt;
 	}
