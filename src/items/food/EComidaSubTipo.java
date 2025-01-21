@@ -64,5 +64,25 @@ public enum EComidaSubTipo {
 		return this.txt;
 	}
 
-	//TODO Métodos obtener si es de la jerarquía.
+	/**
+	 * Indica si el tipo de comida actual (izquierda) pertenece a ese tipo (derecha).
+	 * @param type El tipo contra el que contrastar.
+	 * @return True si el tipo actual pertenece a la categoría del tipo <code>type</code>. False en caso contrario.
+	 */
+	public boolean isType(EComidaSubTipo type)
+	{
+		if(type != null)
+		{
+			EComidaSubTipo current = this;
+			while (current != null) {
+				if(current != type)
+				{
+					current = current.parent;
+				}else{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
