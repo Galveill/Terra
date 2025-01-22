@@ -1,5 +1,6 @@
 package items;
 
+import data.quantity.ERareza;
 import repositories.IRegistrable;
 
 /**
@@ -21,7 +22,7 @@ public interface IObjeto extends IRegistrable {
 	/**
 	 * @return La rareza del objeto.
 	 */
-	public String getRarity();
+	public ERareza getRarity();
 
 	/**
 	 * @return El tipo de objeto de su propia jerarquía.
